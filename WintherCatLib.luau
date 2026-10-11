@@ -5,9 +5,9 @@ local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
 
 local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 local DefaultWinterTheme = {
     Background       = Color3.fromRGB(15, 22, 35),
@@ -34,6 +34,21 @@ local function Create(className, props)
     end
     if props and props.Parent then inst.Parent = props.Parent end
     return inst
+end
+
+local function GetParentGui()
+    local ok, core = pcall(function() return CoreGui end)
+    if ok and core then
+        local success = pcall(function()
+            local test = Instance.new("Folder")
+            test.Parent = core
+            test:Destroy()
+        end)
+        if success then return core end
+    end
+    local ok2, pg = pcall(function() return LocalPlayer:WaitForChild("PlayerGui") end)
+    if ok2 and pg then return pg end
+    return CoreGui
 end
 
 local function Corner(radius, parent)
@@ -78,12 +93,14 @@ function WintherCatLib:CreateWindow(config)
     for k, v in pairs(DefaultWinterTheme) do T[k] = v end
     for k, v in pairs(Theme) do T[k] = v end
     
+    local ParentGui = GetParentGui()
+    
     local ScreenGui = Create("ScreenGui", {
         Name = "WintherCatLib",
         ResetOnSpawn = false,
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
         IgnoreGuiInset = true,
-        Parent = PlayerGui
+        Parent = ParentGui
     })
     
     local Main = Create("Frame", {
