@@ -293,27 +293,36 @@ function WintherCatLib:CreateWindow(config)
     local function SetMinimized(min)
         if State.Destroyed then return end
         if State.Minimized == min then return end
-        if min and State.Fullscreen then return end
-
         State.Minimized = min
 
+        Main.AnchorPoint = Vector2.new(0.5, 0.5)
+
         if min then
+            if State.Fullscreen then
+                State.Fullscreen = false
+            end
             State.SavedSize = Main.Size
             State.SavedPosition = Main.Position
-            Main.AnchorPoint = Vector2.new(0.5, 0.5)
-            TweenService:Create(Main, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Size = UDim2.fromOffset(240, 42),
-                Position = UDim2.new(0.5, 0, 0, 41),
-            }):Play()
             Body.Visible = false
+            Main:TweenSize(
+                UDim2.fromOffset(240, 42),
+                Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true
+            )
+            Main:TweenPosition(
+                UDim2.new(0.5, 0, 0, 41),
+                Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true
+            )
             if typeof(OnMinimize) == "function" then task.spawn(OnMinimize) end
         else
             Body.Visible = true
-            Main.AnchorPoint = Vector2.new(0.5, 0.5)
-            TweenService:Create(Main, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Size = State.SavedSize,
-                Position = State.SavedPosition,
-            }):Play()
+            Main:TweenSize(
+                State.SavedSize,
+                Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true
+            )
+            Main:TweenPosition(
+                State.SavedPosition,
+                Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true
+            )
             if typeof(OnRestore) == "function" then task.spawn(OnRestore) end
         end
     end
@@ -332,17 +341,25 @@ function WintherCatLib:CreateWindow(config)
             State.SavedSize = Main.Size
             State.SavedPosition = Main.Position
             Main.AnchorPoint = Vector2.new(0.5, 0.5)
-            TweenService:Create(Main, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-                Size = UDim2.new(1, 0, 1, 0),
-                Position = UDim2.new(0.5, 0, 0.5, 0),
-            }):Play()
+            Main:TweenSize(
+                UDim2.new(1, 0, 1, 0),
+                Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.35, true
+            )
+            Main:TweenPosition(
+                UDim2.new(0.5, 0, 0.5, 0),
+                Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.35, true
+            )
         else
             State.Fullscreen = false
             Main.AnchorPoint = Vector2.new(0.5, 0.5)
-            TweenService:Create(Main, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-                Size = State.SavedSize,
-                Position = State.SavedPosition,
-            }):Play()
+            Main:TweenSize(
+                State.SavedSize,
+                Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.35, true
+            )
+            Main:TweenPosition(
+                State.SavedPosition,
+                Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.35, true
+            )
         end
     end
 
@@ -355,8 +372,8 @@ function WintherCatLib:CreateWindow(config)
     Track(CloseBtn.MouseButton1Click:Connect(Destroy))
 
     Track(UserInputService.InputBegan:Connect(function(input, gpe)
-        if gpe then return end
         if input.KeyCode == ToggleKey then
+            if UserInputService:GetFocusedTextBox() then return end
             ToggleMinimize()
         end
     end))
